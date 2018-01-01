@@ -6,3 +6,4 @@ Thumbs.db
 test_credentials.json
 dist/js/*.js
 dist/js/popup/*.js
+npm-debug.log

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<!--
+ This page is shown when the extension button is clicked, because the
+ "browser_action" field in manifest.json contains the "default_popup" key with
+ value "popup.html".
+ -->
+<html>
+  <head>
+    <title>Medium Analytics</title>
+
+    <!--
+      - JavaScript and HTML must be in separate files: see our Content Security
+      - Policy documentation[1] for details and explanation.
+      -
+      - [1]: https://developer.chrome.com/extensions/contentSecurityPolicy
+     -->
+     <link href="https://fonts.googleapis.com/css?family=Open+Sans|Lato:300" rel="stylesheet">
+     <link rel="stylesheet" type="text/css" href="popup.css">
+    <script src="popup.js"></script>
+  </head>
+  <body>
+    <div class="header">
+        <h1 style="margin-top: 2px;">Medium Analytics</h1>   
+    </div>
+    <p style="margin-top:10%;">
+        Due to Medium's limited API serices this extension collects 2 pieces of data from your medium homepage.
+        After this, Medium Analytics can run autonomously, forever.
+        All you have to do is click the button below!
+    </p>
+    <img class="background" src="background.png"></img>
+    <button class="button button--ujarak button--border-thin button--text-thick" id="open-medium">Open Medium</button>
+  </body>
+</html>
+

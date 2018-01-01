@@ -1,0 +1,48 @@
+.my-list{
+    float: left;
+    width: 100%;
+    height: auto;
+    padding: 8px;
+    list-style: none;
+    text-decoration: none;
+}
+.card{
+    .card-header{
+        padding:5px;
+        padding-left:7px;
+        font-weight:300;
+    }
+    .card-block{
+        padding:7px;
+    }
+}
+.navbar{
+    border-bottom:1px solid lightgray;
+    border-radius:10px;
+}
+.drop-projection{
+    background:#CCC;
+    border:1px solid #CCC;
+}
+.list-item{
+    float: left;
+    transform-origin: 50% 50%;
+    border-radius: 10px;
+    margin:5px;
+}
+.list-item-3{
+    float:left;
+    width:45%;
+}
+.dragged{
+    background:white;
+    transform: scale(0.98, 0.98);
+    z-index:3;
+    opacity:0.97;
+}
+.referrals{
+    width:30%;
+}
+.summary-card{
+    width:95%;
+}

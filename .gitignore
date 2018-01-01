@@ -4,6 +4,7 @@ test.js
 .c9
 Thumbs.db
 test_credentials.json
-dist/js/*.js
-dist/js/popup/*.js
+extension/dist/*.js
+extension/dist/popup/*.js
+front-end/dist/js/popup
 npm-debug.log

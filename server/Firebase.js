@@ -16,21 +16,18 @@ class Database{
     }
     newUser(username,userId,sessionId){
         let buff = new Buffer(sessionId);  
-        let encodedId = buff.toString('base64');
         // add them to the meta data section
-        let userRef = this.users.child(encodedId)
+        let userRef = this.users.child(username)
         userRef.set({
             userId : userId,
             sessionId : sessionId,
             username:username
         })
     }
-    addSnapshot(sessionId,snapshot,callback){
-        let buff = new Buffer(sessionId);  
-        let encodedId= buff.toString('base64');
+    addSnapshot(username,snapshot,callback){
         let d = new Date();
         let snapshotRef = this.snapshots
-        .child(encodedId)
+        .child(username)
         .child(d.getFullYear())
         .child(d.getMonth())
         .child(d.getDate())
@@ -51,10 +48,8 @@ class Database{
           console.log("The read failed: " + errorObject.code);
         });
     }
-    getSnapshots(sessionId,path,callback){
-        let buff = new Buffer(sessionId);  
-        let encodedId = buff.toString('base64');
-        let ref = this.snapshots.child(encodedId).child(path);
+    getSnapshots(username,path,callback){
+        let ref = this.snapshots.child(username).child(path);
         ref.on("value", function(snapshot) {
           callback(snapshot.val());
         }, function (errorObject) {

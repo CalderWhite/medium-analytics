@@ -29,6 +29,9 @@ export class analyticsFrontendEngine{
      * @param minimumPortion Default:-1 The minimum percentage of `[valueName]` required to be an individual portion of the donut. Those will be clumped into an element called "other".
      */
     static cleanseReferralList(referrals,minimumPortion,keyName,valueName){
+        if (referrals.length < 1){
+            return [];
+        }
         if(minimumPortion == undefined){
             // exclude none if minimumPortion is not set
             minimumPortion = -1;
@@ -87,7 +90,9 @@ export class analyticsFrontendEngine{
     
     static snapshotsToReferralChart(snapshots,detail){
         //TODO: insert referrer names if they aren't present in every snapshot
-        return snapshots.map(({snapshotTimestamp,referrers})=>{
+        return snapshots.filter(({snapshotTimestamp,referrers})=>{
+            return referrers.length > 0
+        }).map(({snapshotTimestamp,referrers})=>{
             let temp = analyticsFrontendEngine.cleanseReferralList(referrers,detail,'name','views')
             let r = {}
             for(let referrer of temp){
@@ -152,13 +157,65 @@ export class analyticsFrontendEngine{
         }
         return colors
     }
+    /**
+     * Turns a normal a dataset with normal snapshots, which contains multiple stories into a dataset with
+     * Objects like snapshots, except they represent all the stories.
+     */
+     static mergeStories(snapshots){
+         for(let i=0;i<snapshots.length;i++){
+             let snap = snapshots[i];
+             // loop forwards through the array except for the last element, since the last element will have ever referrer that occurs
+             // don't loop over the last so we don't double count its stats
+             let lastStory = snap.stories[snap.stories.length-1];
+             for(let s=0;s<snap.stories.length-1;s++){
+                let story = snap.stories[s];
+                // merge story stats
+                lastStory.views += story.views;
+                lastStory.reads += story.reads;
+                lastStory.claps += story.claps;
+                lastStory.upvotes += story.upvotes;
+                // now merge the referrers
+                for(let r=0;r<story.referrers.length;r++){
+                    let found = false;
+                    for(let re=0;re<lastStory.referrers.length;re++){
+                        if(lastStory.referrers[re].name == story.referrers[r].name){
+                            lastStory.referrers[re].views += story.referrers[r].views;
+                            found=true;
+                        }
+                    }
+                    if(!found){
+                        lastStory.referrers.push(story.referrers[r]);
+                    }
+                }
+            }
+            // for some reason undefiend seems to turn up in the list of referrals. Easier to clean it out here rather than trace its source.
+            lastStory.referrers = lastStory.referrers.map(item=>{if (item != undefined) return item})
+            // set only the properties we want
+            snapshots[i] = {
+                views: lastStory.views,
+                reads: lastStory.reads,
+                claps: lastStory.claps,
+                upvotes: lastStory.upvotes,
+                referrers: lastStory.referrers,
+                snapshotTimestamp: snap.snapshotTimestamp
+            }
+         }
+         return snapshots
+     }
+     static getStoryTitles(snapshot){
+         return snapshot.stories.map(({title})=>title)
+     }
+     static selectStory(snapshots,storyName){
+         return snapshots.map(snapshot=>{
+             for(let i=0;i<snapshot.stories.length;i++){
+                 if(snapshot.stories[i].title == storyName){
+                    snapshot.stories[i].snapshotTimestamp = snapshot.snapshotTimestamp;
+                    return snapshot.stories[i];
+                 }
+             }
+         })
+     }
 }
 analyticsFrontendEngine.excludeReferrals = ['RSS readers']
 // my own fork of jquery's color plugin
 analyticsFrontendEngine.colors = ['red','green','orange','blue','indigo','cyan','purple','black']
-/*
-TODO: Re-impliment these properties once <ZoomLineChart> has been fixed to support more than 2 dataKeys
-
-                claps:claps,
-                fans:upvotes,
-*/

@@ -26,12 +26,16 @@ class Utils{
             return Math.max(a, b);
         });
     }
-    static findLatest(obj){
+    static goToMax(obj,key){
         if(typeof(obj) == 'string'){
-            return obj
+            return [key,obj]
         } else{
-            return Utils.findLatest(obj[Utils.getMaxKey(obj)])
+            let maxKey = Utils.getMaxKey(obj)
+            return Utils.goToMax(obj[maxKey],maxKey)
         }
+    }
+    static findLatest(obj){
+        return Utils.goToMax(obj,obj[Utils.getMaxKey(obj)])
     }
 }
 
@@ -42,8 +46,8 @@ export default class firebaseUtils{
     /**
      * Returns all the snapshot available for the given user session.
      */
-    static getData(sessionId,callback){
-        firebase.database().ref('/snapshots/' + new Buffer(sessionId).toString("base64")).once('value').then(function(snapshot) {
+    static getData(username,callback){
+        firebase.database().ref('/snapshots/' + username).once('value').then(function(snapshot) {
             callback(snapshot.val());
         });
     }
@@ -52,10 +56,13 @@ export default class firebaseUtils{
      */
     static getLatestSnapshot(data,callback){
         // recurisvely go to the highest key, until there 
-        let compressed = Utils.findLatest(data);
+        let [timestamp,compressed] = Utils.findLatest(data);
         zlib.gunzip(new Buffer(compressed, 'base64'), function(err, buf) {
             //TODO: handle the `err`
-            let data = JSON.parse(buf.toString())[0];
+            let data = {
+                stories:JSON.parse(buf.toString()),
+                snapshotTimestamp:timestamp
+            }
             callback(data)
         });
     }
@@ -74,8 +81,11 @@ export default class firebaseUtils{
          for(let j=0;j<s.length;j++){
             zlib.gunzip(new Buffer(latestMonth[keys[i]][s[j]], 'base64'), function(err, buf) {
                 //TODO: handle the `err`
-                let data = JSON.parse(buf.toString())[0];
-                data.snapshotTimestamp = Number(s[j])
+                let data = JSON.parse(buf.toString());
+                data = {
+                    stories:data,
+                    snapshotTimestamp:Number(s[j])
+                }
                 snapshots.push(data);
                 if(i == keys.length-1 && j == s.length-1){
                     callback(snapshots)

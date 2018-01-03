@@ -7,7 +7,7 @@ import React, { Component } from 'react';
 import DragSortableList from 'react-drag-sortable'
 
 // import our components
-import {Donut,StackedAreaChart, ScaleableLineChart} from "./components";
+import {Donut, StackedAreaChart, ScaleableLineChart, Card, SearchBar} from "./components";
 
 import tinygradient from "tinygradient";
 
@@ -26,27 +26,7 @@ const app = document.getElementById("app");
 const APP_NAME = "MEDIUM_ANALYTICS";
 // test data
 // TODO: Remove this for production
-const testSessionId = require("./test_credentials.json")['sessionId'];
-
-class Card extends Component{
-  constructor(props){
-    super(props);
-    
-  }
-  render(){
-    return(
-      <div key={this.props.name}>
-        <div className="card-header">{this.props.name}</div>
-        <div className="card-block">
-          {
-            this.props.content
-          }
-        </div>
-      </div>
-    )
-  }
-}
-
+const testUsername = require("./test_credentials.json")['username'];
 export class Grid extends Component {
   constructor () {
     super();
@@ -70,6 +50,7 @@ export class Grid extends Component {
         }
       ],
       data:null,
+      storyTitles:null,
       disableReorder:false,
     };
     this.setCardState.bind(this)();
@@ -97,7 +78,7 @@ export class Grid extends Component {
       this.state.cards = newCardOrder;
     }
   }
-  setCardContent(cardName,content){
+  setCardContent(cardName,content,onQuery,onReset){
     this.setState({
       cards:this.state.cards.map((item)=>{
         if(item.name == cardName){
@@ -105,7 +86,9 @@ export class Grid extends Component {
             <Card
             name={item.name}
             content={content}
-            
+            queryData={this.state.storyTitles}
+            onQuery={onQuery}
+            onReset={onReset}
             />
           )
         }
@@ -113,78 +96,147 @@ export class Grid extends Component {
       })
     })
   }
-  
+  createDonut(snapshot){
+      // process the data for the donut
+      let donutData = dataUtils.cleanseReferralList(dataUtils.formatToDonutData(snapshot.referrers,'name','views'),1)
+      // generate colors for our graphs in the medium-analytics green theme
+      let colors = donutData.length < 2 ? ["#334C1A","#66ff99"] : tinygradient("#334C1A","#66ff99").rgb(donutData.length).map(({_r,_g,_b})=>{
+        return Utils.rgbToHex(Math.floor(_r),Math.floor(_g),Math.floor(_b));
+      });
+      this.setCardContent(
+        "referrals",
+        (
+          <Donut 
+            data={donutData} 
+            colors={colors}
+            donutKey="referrals"
+            height="25%"
+            minHeight={300}
+            maxHeight={350}
+          />  
+        ),
+        name=>{
+          firebaseUtils.getLatestSnapshot(this.state.data,snapshot=>{
+            let newData = dataUtils.selectStory([snapshot],name)[0];
+            this.createDonut(newData)
+          })
+        },
+        ()=>{
+          firebaseUtils.getLatestSnapshot(this.state.data,snapshot=>{
+            let newData = dataUtils.mergeStories([snapshot])[0];
+            this.createDonut(newData)
+          })
+        }
+      )
+  }
+  createLineChart(snapshots){
+    // set up and set the line graph
+    let zoomData = dataUtils.charDataToDeltas(dataUtils.snapshotsToLineChart(snapshots));
+    let zoomNames = Object.keys(zoomData[0]).map((name)=>{
+      let axis = 1;
+      if (name == 'claps' || name == 'fans'){
+        axis = 2;
+      }
+      return {
+        name:name,
+        axis:axis
+      }
+    })
+    zoomNames.splice(zoomNames.indexOf('name'),1);
+    this.setCardContent(
+      'summary',
+      <ScaleableLineChart
+      name="summary"
+      dataKeys={zoomNames}
+      colors={['#8884d8','#82ca9d','red',"orange"]}
+      data={zoomData}
+      height={400}
+      width={'90%'}
+      />,
+      name=>{
+        firebaseUtils.getLatestMonth(this.state.data,snapshots=>{
+          let newData = dataUtils.selectStory(snapshots,name);
+          this.createLineChart(newData);
+        })
+      },
+      ()=>{
+        firebaseUtils.getLatestMonth(this.state.data,snapshots=>{
+          let newData = dataUtils.mergeStories(snapshots);
+          this.createLineChart(newData);
+        })
+      }
+    )
+  }
+  createReferralChart(snapshots){
+    // setup and set the area graph
+    let graphData = dataUtils.snapshotsToReferralChart(snapshots,5)
+    let names = {};
+    for(let i=0;i<graphData.length;i++){
+      let keys = Object.keys(graphData[i]);
+      for(let j=0;j<keys.length;j++){
+        if(keys[j] != 'name'){
+          names[keys[j]] = null;
+        }
+      }
+    }
+    names = Object.keys(names);
+    // remove the date
+    names.splice(names.indexOf('name'),1)
+    // generate the colors for the graph
+    let colors = dataUtils.randomColorSet(names.length);
+    var i=0
+    if(graphData.length < 2){
+      this.setCardContent(
+        'referralViews',
+        <p>Oops! There isn't enough data collected for this graph. Try coming back in about 6 minutes!</p>
+      )
+    } else{
+      this.setCardContent(
+        'referralViews',
+        (
+        <StackedAreaChart
+          data={graphData}
+          metaData={names.map((item)=>{
+            let r =  {dataKey:item,color:colors[i]}
+            i++;
+            return r;
+          })}
+          height={370}
+          width={'45%'}
+        />
+        ),
+        name=>{
+          firebaseUtils.getLatestMonth(this.state.data,snapshots=>{
+            let newData = dataUtils.selectStory(snapshots,name);
+            this.createReferralChart(newData)
+          })
+        },
+        ()=>{
+          firebaseUtils.getLatestMonth(this.state.data,snapshots=>{
+            let newData = dataUtils.mergeStories(snapshots);
+            this.createReferralChart(newData);
+          })
+        }
+      )
+    }
+  }
   componentDidMount(){
     // generate charts based on firebase data retrieved 
-    firebaseUtils.getData(testSessionId,(data)=>{
-      // set the referrals donut
+    firebaseUtils.getData(testUsername,(data)=>{
+      this.setState({data})
       firebaseUtils.getLatestSnapshot(data,(snapshot)=>{
-        // process the data for the donut
-        let donutData = dataUtils.cleanseReferralList(dataUtils.formatToDonutData(snapshot.referrers,'name','views'),1)
-        // generate colors for our graphs in the medium-analytics green theme
-        let colors = tinygradient("#334C1A","#66ff99").rgb(donutData.length).map(({_r,_g,_b})=>{
-          return Utils.rgbToHex(Math.floor(_r),Math.floor(_g),Math.floor(_b));
-        });
-        this.setCardContent(
-          "referrals",
-          (
-            <Donut 
-              data={donutData} 
-              colors={colors}
-              donutKey="referrals"
-              height="25%"
-            />  
-          )
-        )
-      });
-      firebaseUtils.getLatestMonth(data,(snapshots) =>{
-        // setup and set the area graph
-        let graphData = dataUtils.snapshotsToReferralChart(snapshots,5)
-        let names = Object.keys(graphData[0]);
-        // remove the date
-        names.splice(names.indexOf('name'),1)
-        // generate the colors for the graph
-        let colors = dataUtils.randomColorSet(names.length);
-        var i=0
-        this.setCardContent(
-          'referralViews',
-          (
-          <StackedAreaChart
-            data={graphData}
-            metaData={names.map((item)=>{
-              let r =  {dataKey:item,color:colors[i]}
-              i++;
-              return r;
-            })}
-            height={370}
-            width={'45%'}
-          />
-          )
-        )
-        // set up and set the line graph
-        let zoomData = dataUtils.charDataToDeltas(dataUtils.snapshotsToLineChart(snapshots));
-        let zoomNames = Object.keys(zoomData[0]).map((name)=>{
-          let axis = 1;
-          if (name == 'claps' || name == 'fans'){
-            axis = 2;
-          }
-          return {
-            name:name,
-            axis:axis
-          }
+        this.setState({
+          storyTitles:dataUtils.getStoryTitles(snapshot)
         })
-        zoomNames.splice(zoomNames.indexOf('name'),1);
-        this.setCardContent(
-          'summary',
-          <ScaleableLineChart
-          name="summary"
-          dataKeys={zoomNames}
-          colors={['#8884d8','#82ca9d','red',"orange"]}
-          data={zoomData}
-          height={400}
-          width={'90%'}
-          />
-        )
+        snapshot = dataUtils.mergeStories([snapshot])[0]
+        this.createDonut(snapshot);
+      });
+    
+    
+      firebaseUtils.getLatestMonth(data,(snapshots) =>{
+        snapshots = dataUtils.mergeStories(snapshots)
+        this.createReferralChart(snapshots)
+        this.createLineChart(snapshots)
       });
     });
   }
@@ -208,6 +260,6 @@ export class Grid extends Component {
 }
 
 ReactDOM.render(
-  <Grid/>,
+  <Grid />,
   app
 );

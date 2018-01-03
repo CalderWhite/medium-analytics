@@ -8,3 +8,4 @@ test_credentials.json
 **/dist/*.min.js
 **/dist/popup/*.js
 npm-debug.log
+test.html

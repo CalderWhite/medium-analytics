@@ -1,5 +1,6 @@
-import Donut from "./Donut.js";
-import StackedAreaChart from "./StackedAreaChart.js";
-//import ZoomLineChart from "./ZoomLineChart.js";
-import ScaleableLineChart from "./ScaleableLineChart.js"
-export {Donut, StackedAreaChart, ScaleableLineChart};
+import Donut from "./graphs/Donut.js";
+import StackedAreaChart from "./graphs/StackedAreaChart.js";
+import ScaleableLineChart from "./graphs/ScaleableLineChart.js";
+import Card from "./Card.js";
+import SearchBar from "./SearchBar.js";
+export {Donut, StackedAreaChart, ScaleableLineChart, Card, SearchBar};

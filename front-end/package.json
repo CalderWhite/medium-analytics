@@ -22,6 +22,7 @@
     "morris.js": "^0.5.0",
     "raphael": "^2.2.7",
     "react": "^16.2.0",
+    "react-autosuggest": "^9.3.2",
     "react-dom": "^16.0.0",
     "react-drag-sortable": "^1.0.5",
     "react-style-sheets": "^0.1.0",

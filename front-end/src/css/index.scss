@@ -6,11 +6,64 @@
     list-style: none;
     text-decoration: none;
 }
+$header_padding:5px;
 .card{
     .card-header{
-        padding:5px;
+        $input_width:200px;
+        
+        padding:$header_padding;
         padding-left:7px;
         font-weight:300;
+        height:40px;
+        p{
+            float:left;
+            text-align:left;
+        }
+        button{
+            float:left;
+            position:absolute;
+            right:$input_width + 20;
+            padding:5px;
+            margin-top:-4px;
+        }
+        div{
+            div{
+                float:right;
+                input{
+                    float:right;
+                    width:$input_width;
+                }
+                div{
+                    width:$input_width;
+                    margin-left:-0.5px;
+                    ul{
+                        list-style:none;
+                        padding-left:0px;
+                        li{
+                            div{
+                                border-left:1px solid grey;
+                                border-right:1px solid grey;
+                                border-bottom:1px solid grey;
+                                padding:5px;
+                                color:black;
+                                font-weight:bold;
+                            }
+                        }
+                        li:last-child{
+                            div{
+                                border-bottom-left-radius:10px;
+                                border-bottom-right-radius:10px;
+                            }
+                        }
+                        .selected-query{
+                            color:white;
+                            background:#007bff;
+                        }
+                        
+                    }
+                }
+            }
+        }
     }
     .card-block{
         padding:7px;
@@ -41,8 +94,24 @@
     opacity:0.97;
 }
 .referrals{
-    width:30%;
+    width:40%;
+    min-width:300px;
+    max-width:450px;
 }
 .summary-card{
     width:95%;
+}
+input{
+    border-radius:3px;
+    border:1px solid grey;
+}
+.react-autosuggest__suggestions-container{
+    position: absolute;
+    z-index:2;
+    background:white;
+    overflow:hidden;
+    margin-top:24px;
+    margin-right:$header_padding;
+    border-bottom-left-radius:10px;
+    border-bottom-right-radius:10px;
 }

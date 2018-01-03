@@ -19,11 +19,11 @@ class AnalyticsEngine{
             if(err != null){
                 console.err(err);
             }
-            this.firebase.addSnapshot(sessionId,snapshot,callback);
+            this.firebase.addSnapshot(username,snapshot,callback);
         })
     }
-    getSnapshots(sessionId,path,callback){
-        this.firebase.getSnapshots(sessionId,path,(data) => {
+    getSnapshots(username,path,callback){
+        this.firebase.getSnapshots(username,path,(data) => {
             // recursively decompress all the snapshots
             function decodeAll(o,_callback){
                 var keys = Object.keys(o)

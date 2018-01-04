@@ -5,16 +5,21 @@ const WebpackOnBuildPlugin = require('on-build-webpack');
 
 module.exports = {
     entry: {
-        content: __dirname + "/src/content.js",
-        background: __dirname + "/src/background.js",
-        popup: __dirname + "/src/popup/popup.js"
+        content: __dirname + "/src/js/content.js",
+        background: __dirname + "/src/js/background.js",
+        popup: __dirname + "/src/js/popup/popup.js",
+        scripts: __dirname + "/src/js/app/scripts.js"
     },
     output: {
         path: __dirname + "/dist",
         filename: '[name].js'
     },
     resolve: {
-        extensions:['.js','.scss']
+        extensions:['.js','.scss'],
+        alias: {
+            'morris.js': 'morris.js/morris.min.js',
+            "raphael" : "raphael/raphael.min.js"
+        }
     },
     module: {
         loaders:[
@@ -46,14 +51,16 @@ module.exports = {
     plugins: [
         new webpack.optimize.OccurrenceOrderPlugin(),
         new WebpackOnBuildPlugin((stats) =>{
+            const moveFile = (oldPath,newPath) =>{
+                fs.stat(__dirname + oldPath,(err,stats) =>{
+                    if(err == null){
+                        fs.rename(__dirname + oldPath,__dirname + newPath);
+                    }
+                })
+            }
             // move `popup.js` into the popup directory
-            let oldPath = __dirname + "/dist/popup.js";
-            let newPath = __dirname + "/dist/popup/popup.js";
-            fs.stat(oldPath,(err,stats) =>{
-                if(err == null){
-                    fs.rename(oldPath,newPath);
-                }
-            })
+            moveFile('/dist/popup.js','/dist/popup/popup.js');
+            moveFile('/dist/scripts.js','/dist/app/js/scripts.min.js')
         })
     ],
     cache:true

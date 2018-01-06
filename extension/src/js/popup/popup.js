@@ -3,13 +3,8 @@ const $ = require('jquery')
 $(document).ready(()=>{
     $("#open-analytics")[0].onclick = () =>{
         chrome.runtime.getBackgroundPage((bgWindow) =>{
-            bgWindow.openMediumForward();
+            bgWindow.openBasedOnCredentials();
             window.close();     // Close dialog
         });
-    }
-    $('#signup')[0].onclick = () =>{
-    	chrome.runtime.getBackgroundPage(bgWindow =>{
-    		bgWindow.openPage('../app/signup.html')
-    	})
     }
 })

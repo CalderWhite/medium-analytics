@@ -52,9 +52,8 @@ function main(){
         } else{
             // if there is a query parameter saying to forward this page to the dashboard application, do that
             if(getParameterByName('forward-to-medium-analytics',window.location.href) != null){
-                chrome.runtime.sendMessage({message:'open-analytics'},err=>{
-                    window.close();
-                })
+                chrome.runtime.sendMessage({message:'send-data'});
+                chrome.runtime.sendMessage({message:'close-me'});
             }
         }
     });

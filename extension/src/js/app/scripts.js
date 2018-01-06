@@ -45,6 +45,17 @@ import "../../css/app/index.scss"
 const app = document.getElementById("app");
 const APP_NAME = "MEDIUM_ANALYTICS";
 
+function getParameterByName(name, url) {
+    if (!url) url = window.location.href;
+    name = name.replace(/[\[\]]/g, "\\$&");
+    var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+        results = regex.exec(url);
+    if (!results) return null;
+    if (!results[2]) return '';
+    return decodeURIComponent(results[2].replace(/\+/g, " "));
+}
+
+
 export class Grid extends Component {
   constructor () {
     super();
@@ -241,41 +252,38 @@ export class Grid extends Component {
   }
   componentDidMount(){
     // generate charts based on firebase data retrieved 
-    chrome.runtime.getBackgroundPage(bgWindow=>{
-      let userCredentials = bgWindow.getCurrentUserData();
-      firebaseUtils.getData(userCredentials.username,(data)=>{
-        if(data == undefined || data == null){
-          this.setCardContent(
-            'referrals',
-            <p>Oops! There isn't enough data collected for this graph. Try coming back in about 6 minutes!</p>
-          );
-          this.setCardContent(
-            'referralViews',
-            <p>Oops! There isn't enough data collected for this graph. Try coming back in about 6 minutes!</p>
-          );
-          this.setCardContent(
-            'summary',
-            <p>Oops! There isn't enough data collected for this graph. Try coming back in about 6 minutes!</p>
-          )
-          return;
-        }
-        this.setState({data})
-        firebaseUtils.getLatestSnapshot(data,(snapshot)=>{
-          this.setState({
-            storyTitles:dataUtils.getStoryTitles(snapshot)
-          })
-          snapshot = dataUtils.mergeStories([snapshot])[0]
-          this.createDonut(snapshot);
-        });
-      
-      
-        firebaseUtils.getLatestMonth(data,(snapshots) =>{
-          snapshots = dataUtils.mergeStories(snapshots)
-          this.createReferralChart(snapshots)
-          this.createLineChart(snapshots)
-        });
+    firebaseUtils.getData((data)=>{
+      if(data == undefined || data == null){
+        this.setCardContent(
+          'referrals',
+          <p>Oops! There isn't enough data collected for this graph. Try coming back in about 6 minutes!</p>
+        );
+        this.setCardContent(
+          'referralViews',
+          <p>Oops! There isn't enough data collected for this graph. Try coming back in about 6 minutes!</p>
+        );
+        this.setCardContent(
+          'summary',
+          <p>Oops! There isn't enough data collected for this graph. Try coming back in about 6 minutes!</p>
+        )
+        return;
+      }
+      this.setState({data})
+      firebaseUtils.getLatestSnapshot(data,(snapshot)=>{
+        this.setState({
+          storyTitles:dataUtils.getStoryTitles(snapshot)
+        })
+        snapshot = dataUtils.mergeStories([snapshot])[0]
+        this.createDonut(snapshot);
       });
-    })
+    
+    
+      firebaseUtils.getLatestMonth(data,(snapshots) =>{
+        snapshots = dataUtils.mergeStories(snapshots)
+        this.createReferralChart(snapshots)
+        this.createLineChart(snapshots)
+      });
+    });
   }
   saveCardOrder(cards){
     window.localStorage[APP_NAME + "_CARD_ORDER"] = JSON.stringify(cards.map(({name,rank})=>{
@@ -303,28 +311,66 @@ class App extends Component{
       content: <p>Loading content...</p>
     }
     this.renderGrid = this.renderGrid.bind(this);
+    this.continueToNextPage = this.continueToNextPage.bind(this);
   }
   renderGrid(){
+    // if the test is run here, it catches all cases that this may be called
+    chrome.runtime.getBackgroundPage(bgWindow=>{
+      let mediumCredentials = bgWindow.getCurrentUserData();
+      console.log("SAVEDATA? : ",getParameterByName('saveData',window.location.href))
+      if(getParameterByName('saveData',window.location.href) == 'true'){
+        firebaseUtils.newMediumCredentials(firebase.auth().currentUser.uid,mediumCredentials)
+      }
+    });
     this.setState({
       content: <Grid />
     })
   }
-  componentDidMount(){
-    var provider = new firebase.auth.FacebookAuthProvider();
-    // use the device's default language
-    let userData;
-    firebase.auth().onAuthStateChanged(function(authData) {
-      if (authData) {
-        userData = authData;
-      }
-    });
-    if (userData){
-      this.renderGrid();
+  goToMedium(){
+    window.location.href = "https://medium.com/?forward-to-medium-analytics"
+  }
+  continueToNextPage(){
+    let toMedium = getParameterByName('forward-to-medium',window.location.href);
+    if(toMedium != null){
+      this.goToMedium();
     } else{
-        this.setState({
-          content: <SignUpPage firebase={firebase} continueToNextPage={this.renderGrid}/>
-        })
+      this.renderGrid();
     }
+  }
+  setNavBarLinks(){
+    let logout = document.getElementById("logout");
+    logout.style.display = "inline";
+    logout.onclick = () =>{
+      firebase.auth().signOut().then(function() {
+        // Sign-out successful.
+      }).catch(function(error) {
+        // An error happened.
+        alert("Error signing out.")
+      });
+    }
+  }
+  hideLinks(){
+    let logout = document.getElementById("logout");
+    logout.style.display="none"
+  }
+  componentDidMount(){
+    let t = this;
+    chrome.runtime.getBackgroundPage(bgWindow=>{
+      let mediumCredentials = bgWindow.getCurrentUserData();
+      firebase.auth().onAuthStateChanged(function(authData) {
+        if (authData && mediumCredentials.username != null){
+          t.setNavBarLinks();
+          t.renderGrid();
+        } else if(mediumCredentials.username != null){
+          t.hideLinks();
+            t.setState({
+              content: <SignUpPage firebase={firebase} continueToNextPage={t.continueToNextPage}/>
+            })
+        } else{
+          t.goToMedium();
+        }
+      });
+    })
   }
   render(){
     return this.state.content

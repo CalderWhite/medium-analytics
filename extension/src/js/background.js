@@ -1,27 +1,31 @@
+// import & setup firebase
+const firebase = require("firebase/app");
+require("firebase/auth");
+require("firebase/database");
+
+// Initialize Firebase
+var config = {
+  apiKey: "AIzaSyAPNUxOVPUOABbeFkqbDice-tK3sTr9dds",
+  authDomain: "medium-analytics.firebaseapp.com",
+  databaseURL: "https://medium-analytics.firebaseio.com",
+  projectId: "medium-analytics",
+  storageBucket: "medium-analytics.appspot.com",
+  messagingSenderId: "815409834711"
+};
+firebase.initializeApp(config);
+// use the device's default language for all proceeding operations
+firebase.auth().useDeviceLanguage();
+let firebaseConnector = require('./app/firebaseConnector.js');
+const firebaseUtils = new firebaseConnector.default(firebase);
+
 const $ = require('jquery');
-// this code can run in the background, but is currently set to work with events.
-// Google: chrome.runtime.onMessage.addListener
-// this code runs on every page opened
-const PROTOCOL = "http"//"https";
-const SERVER_BASE = "newspace-calderwhite.c9users.io";
-const API_PATH = "/api"
 var userInfo = {
     username : null,
     userId : null,
     sessionId: null,
     email: null
 }
-function sendData(callback){
-    $.ajax({
-        type:"POST",
-        url:PROTOCOL + "://" + SERVER_BASE + API_PATH + "/new_credentials",
-        data:userInfo,
-    })
-    if(callback != undefined && callback != null){
-    	callback();
-    }
-}
-
+var sendData = false;
 function checkSendHeaders(details){
     let url = details.url;
     if(url.toLowerCase().search("_/api/stream") > -1){
@@ -47,7 +51,10 @@ function checkSendHeaders(details){
         userInfo.sessionId = sessionId;
         // if all the values are present, make the POST request
         if(userInfo.username != null){
-            sendData();
+            if(sendData){
+                checkGoTo();
+                sendData=false;
+            }
         }
     }
 }
@@ -66,8 +73,8 @@ chrome.runtime.onMessage.addListener(function(request, sender, callback) {
     if(request.username != undefined){
         userInfo.username = request.username;
         userInfo.email = request.email;
-        if(userInfo.userId != null && userInfo.sessionId != null){
-            sendData(callback)
+        if(userInfo.username != null && userInfo.userId != null && userInfo.sessionId != null){
+            checkGoTo();
         }
     }
 	return true;
@@ -78,17 +85,43 @@ chrome.runtime.onMessage.addListener((request, sender, callback) =>{
         if(request.closeCurrent){
             chrome.tabs.remove(sender.tab.id);
         }
-        console.log('ay')
+    }
+})
+chrome.runtime.onMessage.addListener((request, sender, callback) =>{
+    if(request.message == 'send-data'){
+        if(userInfo.username != null && userInfo.userId != null && userInfo.sessionId != null){
+            checkGoTo();
+        } else{
+            sendData=true;
+        }
+    }
+})
+chrome.runtime.onMessage.addListener((request, sender, callback) =>{
+    if(request.message == 'close-me'){
+        chrome.tabs.remove(sender.tab.id);
     }
 })
 
-// functions accessable by other windows
-window.openMediumForward = () => {
-    window.open("https://medium.com?forward-to-medium-analytics")
+function checkGoTo(){
+    console.log("RUNNING CHECK GO TO")
+    openAnalytics('saveData=true')
 }
-window.openAnalytics = () => {
+
+// functions accessable by other windows
+window.openBasedOnCredentials = () => {
+    // if the user info has already been gathered, do not re-gather it.
+    if(userInfo.username != null){
+        window.openAnalytics();
+    } else{
+        window.openAnalytics("forward-to-medium");
+    }
+}
+window.openAnalytics = (queryString) => {
     console.log("Opening analytics...")
-    chrome.tabs.create({url:chrome.extension.getURL('app/index.html')})
+    if(!queryString){
+        queryString = "";
+    }
+    chrome.tabs.create({url:chrome.extension.getURL('app/index.html?' + queryString)})
 }
 window.openPage = (url) =>{
     window.open(url);

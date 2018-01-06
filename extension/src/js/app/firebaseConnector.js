@@ -26,7 +26,7 @@ export default class firebaseUtils{
     /**
      * Adds a user the sign in info to /users in the realtime database
      */
-    newUser(userData,callback){
+    newProviderUser(userData,callback){
       console.log(userData)
       let saveData = {
         uid : userData.uid,
@@ -46,13 +46,23 @@ export default class firebaseUtils{
         .update(saveData)
         .then(callback)
     }
+    newMediumCredentials(uid,userData,callback){
+      console.log("SAVING USER DATA")
+      this.firebase
+        .database()
+        .ref('/users')
+        .child(uid)
+        .child('medium-account')
+        .update(userData)
+        .then(callback)
+    }
     /**
      * Returns all the snapshot available for the given user session.
      */
-    getData(username,callback){
-        this.firebase.database().ref('/snapshots/' + username).once('value').then(function(snapshot) {
-            callback(snapshot.val());
-        });
+    getData(callback){
+      this.firebase.database().ref('/snapshots/' + this.firebase.auth().currentUser.uid).once('value').then(function(snapshot) {
+          callback(snapshot.val());
+      });
     }
     /**
      * Returns the latest snapshot out of all the snapshot data returned from `firebaseUtils.getData`.

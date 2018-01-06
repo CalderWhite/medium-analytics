@@ -36,6 +36,7 @@ export default class SignUpPage extends Component{
 	signUpWithEmail(){
 		this.state.firebase.auth().createUserWithEmailAndPassword(this.state.emailInput, this.state.passwordInput)
 		.then((user)=>{
+			this.state.firebaseUtils.newProviderUser(user);
 			this.state.firebase.auth().onAuthStateChanged(user=>{
 				this.state.firebase.auth().currentUser.sendEmailVerification({url:'https://calderwhite.github.io/medium-analytics/login'})
 				.then(this.continueToVerifyPage)
@@ -53,7 +54,7 @@ export default class SignUpPage extends Component{
 	signUp(provider){
 		var t = this;
 		this.state.firebase.auth().signInWithPopup(provider).then((result) =>{
-			t.state.firebaseUtils.newUser(result.user,()=>{
+			t.state.firebaseUtils.newProviderUser(result.user,()=>{
 				this.props.continueToNextPage()
 			}),
 			()=>{

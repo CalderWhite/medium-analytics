@@ -14,12 +14,12 @@ class AnalyticsEngine{
     newSavedUser(username,userId,sessionId){
         this.firebase.newUser(username,userId,sessionId);
     }
-    addSnapshot(username,userId,sessionId,callback){
+    addSnapshot(uid,username,userId,sessionId,callback){
         this.getDataSnapshot(username,userId,sessionId,(err,snapshot) =>{
             if(err != null){
-                console.err(err);
+                console.error(err);
             }
-            this.firebase.addSnapshot(username,snapshot,callback);
+            this.firebase.addSnapshot(uid,snapshot,callback);
         })
     }
     getSnapshots(username,path,callback){

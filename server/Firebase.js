@@ -14,20 +14,16 @@ class Database{
         this.users = this.database.ref(USER_PATH);
         this.snapshots = this.database.ref(SNAPSHOT_PATH);
     }
-    newUser(username,userId,sessionId){
+    newUser(userInfo){
         let buff = new Buffer(sessionId);  
         // add them to the meta data section
         let userRef = this.users.child(username)
-        userRef.set({
-            userId : userId,
-            sessionId : sessionId,
-            username:username
-        })
+        userRef.set(userInfo)
     }
-    addSnapshot(username,snapshot,callback){
+    addSnapshot(uid,snapshot,callback){
         let d = new Date();
         let snapshotRef = this.snapshots
-        .child(username)
+        .child(uid)
         .child(d.getFullYear())
         .child(d.getMonth())
         .child(d.getDate())
@@ -40,16 +36,16 @@ class Database{
             .then(callback,()=>{console.log("Error adding snapshot @ update")})
         });
     }
-    getUser(username,callback){
-        let ref = this.users.child(username)
+    getUser(uid,callback){
+        let ref = this.users.child(uid)
         ref.on("value", function(snapshot) {
           callback(snapshot.val());
         }, function (errorObject) {
           console.log("The read failed: " + errorObject.code);
         });
     }
-    getSnapshots(username,path,callback){
-        let ref = this.snapshots.child(username).child(path);
+    getSnapshots(uid,path,callback){
+        let ref = this.snapshots.child(uid).child(path);
         ref.on("value", function(snapshot) {
           callback(snapshot.val());
         }, function (errorObject) {

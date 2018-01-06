@@ -12,6 +12,8 @@
     "body-parser": "^1.18.2",
     "express": "^4.16.2",
     "firebase-admin": "^5.5.1",
+    "jquery": "^3.2.1",
+    "jsdom": "^11.5.1",
     "react-draggable": "^3.0.4"
   }
 }

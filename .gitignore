@@ -4,6 +4,9 @@ test.js
 .c9
 Thumbs.db
 test_credentials.json
+**/dist/app/js/*.js
+**/dist/app/js/*.min.js
+
 **/dist/*.js
 **/dist/*.min.js
 **/dist/popup/*.js

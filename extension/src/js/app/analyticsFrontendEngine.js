@@ -7,6 +7,10 @@ export class Utils{
     static rgbToHex(r, g, b) {
         return "#" + Utils.componentToHex(r) + Utils.componentToHex(g) + Utils.componentToHex(b);
     }
+    static getDateString(timestamp){
+        let d = (new Date(timestamp)).toString();
+        return d.substring(4,d.search('GMT')).replace(/[0-9]{4} /,'')
+    }
 
 }
 export class analyticsFrontendEngine{
@@ -143,7 +147,7 @@ export class analyticsFrontendEngine{
                 reads:reads,
                 claps:claps,
                 fans:upvotes,
-                name:snapshotTimestamp
+                name:Utils.getDateString(snapshotTimestamp)
             }
         })
     }

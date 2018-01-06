@@ -3,12 +3,13 @@ const $ = require('jquery');
 // Google: chrome.runtime.onMessage.addListener
 // this code runs on every page opened
 const PROTOCOL = "http"//"https";
-const SERVER_BASE = "127.0.0.1:8080"//"newspace-calderwhite.c9users.io";
+const SERVER_BASE = "newspace-calderwhite.c9users.io";
 const API_PATH = "/api"
 var userInfo = {
     username : null,
     userId : null,
-    sessionId: null
+    sessionId: null,
+    email: null
 }
 function sendData(callback){
     $.ajax({
@@ -64,6 +65,7 @@ chrome.webRequest.onSendHeaders.addListener(
 chrome.runtime.onMessage.addListener(function(request, sender, callback) {
     if(request.username != undefined){
         userInfo.username = request.username;
+        userInfo.email = request.email;
         if(userInfo.userId != null && userInfo.sessionId != null){
             sendData(callback)
         }
@@ -73,15 +75,20 @@ chrome.runtime.onMessage.addListener(function(request, sender, callback) {
 chrome.runtime.onMessage.addListener((request, sender, callback) =>{
     if(request.message == 'open-analytics'){
         window.openAnalytics();
+        if(request.closeCurrent){
+            chrome.tabs.remove(sender.tab.id);
+        }
+        console.log('ay')
     }
 })
+
 // functions accessable by other windows
 window.openMediumForward = () => {
     window.open("https://medium.com?forward-to-medium-analytics")
 }
 window.openAnalytics = () => {
     console.log("Opening analytics...")
-    window.open('app/index.html')
+    chrome.tabs.create({url:chrome.extension.getURL('app/index.html')})
 }
 window.openPage = (url) =>{
     window.open(url);

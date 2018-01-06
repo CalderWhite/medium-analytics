@@ -1,0 +1,15 @@
+.card-wrapper{
+	text-align:center;
+}
+.card{
+	display:inline-block;
+	margin-top:7%;
+	padding-top:20px;
+	padding-bottom:20px;
+	padding-left:10px;
+	padding-right:10px;
+}
+.navbar{
+    border-bottom:1px solid lightgray;
+    border-radius:10px;
+}

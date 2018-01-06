@@ -21,6 +21,7 @@ export default class Card extends Component{
       <div id={'card-' + this.props.name} >
         <div className="card-header">
           <p style={{float:'left'}}>{this.props.name}</p>
+          <div style={{display:'inline-block', float:'right'}}>
           <button 
             className="no-drag btn btn-light" 
             style={{border:'1px solid grey'}}
@@ -33,6 +34,7 @@ export default class Card extends Component{
             data={this.props.queryData}
             onSelect={this.props.onQuery}
           />
+          </div>
         </div>
         <div className="card-block">
           {

@@ -8,7 +8,8 @@ module.exports = {
         content: __dirname + "/src/js/content.js",
         background: __dirname + "/src/js/background.js",
         popup: __dirname + "/src/js/popup/popup.js",
-        scripts: __dirname + "/src/js/app/scripts.js"
+        scripts: __dirname + "/src/js/app/scripts.js",
+        verifyPage: __dirname + "/src/js/app/verifyPage.js"
     },
     output: {
         path: __dirname + "/dist",
@@ -31,6 +32,11 @@ module.exports = {
                   cacheDirectory: true,
                   presets: ['react', 'es2015']
                 }
+            },
+            {
+                test:/\.css$/,
+                exclude:/node_modules/,
+                use:['style-loader','css-loader']
             },
             {
                 test:/\.scss$/,
@@ -60,7 +66,8 @@ module.exports = {
             }
             // move `popup.js` into the popup directory
             moveFile('/dist/popup.js','/dist/popup/popup.js');
-            moveFile('/dist/scripts.js','/dist/app/js/scripts.min.js')
+            moveFile('/dist/scripts.js','/dist/app/js/scripts.min.js');
+            moveFile('/dist/verifyPage.js','/dist/app/js/verifyPage.min.js')
         })
     ],
     cache:true

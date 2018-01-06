@@ -1,25 +1,5 @@
 const zlib = require("zlib");
-// firebase
-const firebase = require("firebase/app");
-//require("firebase/auth");
-require("firebase/database");
 
-// Initialize Firebase
-var config = {
-  apiKey: "AIzaSyAPNUxOVPUOABbeFkqbDice-tK3sTr9dds",
-  authDomain: "medium-analytics.firebaseapp.com",
-  databaseURL: "https://medium-analytics.firebaseio.com",
-  projectId: "medium-analytics",
-  storageBucket: "medium-analytics.appspot.com",
-  messagingSenderId: "815409834711"
-};
-firebase.initializeApp(config);
-
-// Get a reference to the database service
-const database = firebase.database();
-// testing code
-var userRef = firebase.database().ref('users');
-const sessionId = 'MTp5ZW9kOTFqbktkZndmbmFBRmc2bEdRN05XY1hRTjM1Uk9KWFJ4RnRPbnR5UDhPOG5Iby9EK3A2djVjQzdPcUU3';
 class Utils{
     static getMaxKey(obj){
          return Object.keys(obj).map((key,value)=>(Number(key))).reduce(function(a, b) {
@@ -40,21 +20,44 @@ class Utils{
 }
 
 export default class firebaseUtils{
-    constructor(){
-        
+    constructor(firebase){
+        this.firebase = firebase
+    }
+    /**
+     * Adds a user the sign in info to /users in the realtime database
+     */
+    newUser(userData,callback){
+      console.log(userData)
+      let saveData = {
+        uid : userData.uid,
+        provider: userData.providerData[0].providerId,
+        displayName: userData.providerData[0].displayName,
+        phoneNumber : userData.providerData[0].phoneNumber,
+        email: userData.providerData[0].email,
+        photoURL : userData.providerData[0].photoURL,
+        providerUID: userData.providerData[0].uid
+      }
+      console.log(saveData)
+      this.firebase
+        .database()
+        .ref('/users')
+        .child(saveData.uid)
+        .child('firebase-account')
+        .update(saveData)
+        .then(callback)
     }
     /**
      * Returns all the snapshot available for the given user session.
      */
-    static getData(username,callback){
-        firebase.database().ref('/snapshots/' + username).once('value').then(function(snapshot) {
+    getData(username,callback){
+        this.firebase.database().ref('/snapshots/' + username).once('value').then(function(snapshot) {
             callback(snapshot.val());
         });
     }
     /**
      * Returns the latest snapshot out of all the snapshot data returned from `firebaseUtils.getData`.
      */
-    static getLatestSnapshot(data,callback){
+    getLatestSnapshot(data,callback){
         // recurisvely go to the highest key, until there 
         let [timestamp,compressed] = Utils.findLatest(data);
         zlib.gunzip(new Buffer(compressed, 'base64'), function(err, buf) {
@@ -69,7 +72,7 @@ export default class firebaseUtils{
     /**
      * Decompresses the latest month's snapshots and puts them into a list
      */
-    static getLatestMonth(data,callback){
+    getLatestMonth(data,callback){
       let latestMonth = data[Utils.getMaxKey(data)];
       latestMonth = latestMonth[Utils.getMaxKey(latestMonth)];
       let done = 0;

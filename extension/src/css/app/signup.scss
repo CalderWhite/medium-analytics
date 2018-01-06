@@ -1,0 +1,13 @@
+$fb_height : 50px;
+$fb_width : 265px;
+.fb-login-button{
+		span{
+			height:$fb_height !important;
+			width:$fb_width !important;
+			iframe{
+				height:$fb_height !important;
+				width:$fb_width !important;
+				padding: 5px;
+			}
+		}
+}

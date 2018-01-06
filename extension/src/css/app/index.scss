@@ -19,12 +19,13 @@ $header_padding:5px;
             float:left;
             text-align:left;
         }
-        button{
-            float:left;
-            position:absolute;
-            right:$input_width + 20;
-            padding:5px;
-            margin-top:-4px;
+        div{
+	        button{
+	            float:left;
+	            padding:5px;
+	            margin-top:-4px;
+	            margin-right:20px;
+	        }
         }
         div{
             div{

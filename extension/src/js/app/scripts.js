@@ -10,12 +10,32 @@ import DragSortableList from 'react-drag-sortable'
 import {Donut, StackedAreaChart, ScaleableLineChart, Card, SearchBar} from "./components";
 
 import tinygradient from "tinygradient";
+// firebase
+const firebase = require("firebase/app");
+require("firebase/auth");
+require("firebase/database");
+
+// Initialize Firebase
+var config = {
+  apiKey: "AIzaSyAPNUxOVPUOABbeFkqbDice-tK3sTr9dds",
+  authDomain: "medium-analytics.firebaseapp.com",
+  databaseURL: "https://medium-analytics.firebaseio.com",
+  projectId: "medium-analytics",
+  storageBucket: "medium-analytics.appspot.com",
+  messagingSenderId: "815409834711"
+};
+firebase.initializeApp(config);
+// use the device's default language for all proceeding operations
+firebase.auth().useDeviceLanguage();
 
 // import our own firebase library
-import firebaseUtils from "./firebaseConnector";
+let firebaseConnector = require('./firebaseConnector.js');
+const firebaseUtils = new firebaseConnector.default(firebase);
 
 // import our data util library
 import {Utils, analyticsFrontendEngine} from "./analyticsFrontendEngine";
+// import the other pages of the app
+import SignUpPage from "./SignUpPage";
 // shorten this mouthful a little bit
 const dataUtils = analyticsFrontendEngine;
 
@@ -224,6 +244,21 @@ export class Grid extends Component {
     chrome.runtime.getBackgroundPage(bgWindow=>{
       let userCredentials = bgWindow.getCurrentUserData();
       firebaseUtils.getData(userCredentials.username,(data)=>{
+        if(data == undefined || data == null){
+          this.setCardContent(
+            'referrals',
+            <p>Oops! There isn't enough data collected for this graph. Try coming back in about 6 minutes!</p>
+          );
+          this.setCardContent(
+            'referralViews',
+            <p>Oops! There isn't enough data collected for this graph. Try coming back in about 6 minutes!</p>
+          );
+          this.setCardContent(
+            'summary',
+            <p>Oops! There isn't enough data collected for this graph. Try coming back in about 6 minutes!</p>
+          )
+          return;
+        }
         this.setState({data})
         firebaseUtils.getLatestSnapshot(data,(snapshot)=>{
           this.setState({
@@ -248,7 +283,7 @@ export class Grid extends Component {
     }))
   }
   render () {
-    return (
+    return(
       <div>
         <DragSortableList
           items={this.state.cards}
@@ -257,11 +292,46 @@ export class Grid extends Component {
           onSort={this.saveCardOrder}
         />
       </div>
-    );
+    )
+  }
+}
+
+class App extends Component{
+  constructor(props){
+    super(props);
+    this.state = {
+      content: <p>Loading content...</p>
+    }
+    this.renderGrid = this.renderGrid.bind(this);
+  }
+  renderGrid(){
+    this.setState({
+      content: <Grid />
+    })
+  }
+  componentDidMount(){
+    var provider = new firebase.auth.FacebookAuthProvider();
+    // use the device's default language
+    let userData;
+    firebase.auth().onAuthStateChanged(function(authData) {
+      if (authData) {
+        userData = authData;
+      }
+    });
+    if (userData){
+      this.renderGrid();
+    } else{
+        this.setState({
+          content: <SignUpPage firebase={firebase} continueToNextPage={this.renderGrid}/>
+        })
+    }
+  }
+  render(){
+    return this.state.content
   }
 }
 
 ReactDOM.render(
-  <Grid />,
+  <App />,
   app
 );

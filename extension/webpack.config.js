@@ -64,6 +64,10 @@ module.exports = {
                     }
                 })
             }
+            // if it doesn't exist, create the js directory
+            if (!fs.existsSync('./dist/app/js')){
+                fs.mkdirSync('./dist/app/js');
+            }
             // move `popup.js` into the popup directory
             moveFile('/dist/popup.js','/dist/popup/popup.js');
             moveFile('/dist/scripts.js','/dist/app/js/scripts.min.js');

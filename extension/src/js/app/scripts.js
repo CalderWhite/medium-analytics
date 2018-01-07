@@ -47,7 +47,7 @@ const app = $("#app")[0];
 const APP_NAME = "MEDIUM_ANALYTICS";
 
 const PROTOCOL = "http"//"https";
-const SERVER_BASE = "127.0.0.1:8080"//"newspace-calderwhite.c9users.io";
+const SERVER_BASE = "medium-analytics.herokuapp.com";
 const API_PATH = "/api"
 
 function getParameterByName(name, url) {

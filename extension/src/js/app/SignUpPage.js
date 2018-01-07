@@ -1,4 +1,4 @@
-import React, {Component} from "React";
+import React, {Component} from "react";
 import "../../css/app/signup.scss";
 import firebaseUtils from "./firebaseConnector.js";
 

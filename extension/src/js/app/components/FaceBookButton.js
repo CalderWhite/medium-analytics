@@ -1,4 +1,4 @@
-import React, {Component} from "React";
+import React, {Component} from "react";
 import "../../../css/app/signInButtons.css";
 
 // didn't have time to get facebook's code generator working to my needs, so this

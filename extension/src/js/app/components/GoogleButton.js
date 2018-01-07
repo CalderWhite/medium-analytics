@@ -1,4 +1,4 @@
-import React, {Component} from "React";
+import React, {Component} from "react";
 import "../../../css/app/signInButtons.css";
 
 export default class GoogleButton extends Component{

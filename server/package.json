@@ -2,9 +2,13 @@
   "name": "medium-analytics-server",
   "version": "0.1.0",
   "description": "The backend of Medium Analytics",
-  "main": "index.js",
+  "main": "updateServer.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node updateServer.js"
+  },
+  "engines": {
+    "node": "9.3.0"
   },
   "repository": {
     "type": "git",

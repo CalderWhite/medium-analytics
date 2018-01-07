@@ -20,7 +20,7 @@ function updateUser(userCredentials){
         uid,
         username,
         userId,
-        sessionId,
+        sessionId
     )
 }
 function serverInit(){

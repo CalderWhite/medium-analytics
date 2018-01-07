@@ -44,6 +44,13 @@ class Database{
           console.log("The read failed: " + errorObject.code);
         });
     }
+    getUsers(callback){
+        this.users.once("value", function(snapshot) {
+          callback(snapshot.val());
+        }, function (errorObject) {
+          console.log("The read failed: " + errorObject.code);
+        });
+    }
     getSnapshots(uid,path,callback){
         let ref = this.snapshots.child(uid).child(path);
         ref.on("value", function(snapshot) {

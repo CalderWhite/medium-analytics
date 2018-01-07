@@ -103,7 +103,7 @@ chrome.runtime.onMessage.addListener((request, sender, callback) =>{
 })
 
 function checkGoTo(){
-    console.log("RUNNING CHECK GO TO")
+    console.log("RUNNING CHECK GO TO");
     openAnalytics('saveData=true')
 }
 

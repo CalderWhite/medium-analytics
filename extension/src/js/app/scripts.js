@@ -10,6 +10,7 @@ import DragSortableList from 'react-drag-sortable'
 import {Donut, StackedAreaChart, ScaleableLineChart, Card, SearchBar} from "./components";
 
 import tinygradient from "tinygradient";
+const $ = require('jquery');
 // firebase
 const firebase = require("firebase/app");
 require("firebase/auth");
@@ -42,8 +43,12 @@ const dataUtils = analyticsFrontendEngine;
 // import our stylesheets we need
 import "../../css/app/index.scss"
 // get the DOM element that our app is based on
-const app = document.getElementById("app");
+const app = $("#app")[0];
 const APP_NAME = "MEDIUM_ANALYTICS";
+
+const PROTOCOL = "http"//"https";
+const SERVER_BASE = "127.0.0.1:8080"//"newspace-calderwhite.c9users.io";
+const API_PATH = "/api"
 
 function getParameterByName(name, url) {
     if (!url) url = window.location.href;
@@ -319,7 +324,15 @@ class App extends Component{
       let mediumCredentials = bgWindow.getCurrentUserData();
       console.log("SAVEDATA? : ",getParameterByName('saveData',window.location.href))
       if(getParameterByName('saveData',window.location.href) == 'true'){
-        firebaseUtils.newMediumCredentials(firebase.auth().currentUser.uid,mediumCredentials)
+        // add medium credentials to firebase database
+        firebaseUtils.newMediumCredentials(firebase.auth().currentUser.uid,mediumCredentials);
+        // send the credentials to the update server, since it only reads the firebase database on boot
+        mediumCredentials.uid = firebase.auth().currentUser.uid;
+        $.ajax({
+            type:"POST",
+            url:PROTOCOL + "://" + SERVER_BASE + API_PATH + "/new_credentials",
+            data:mediumCredentials,
+        })
       }
     });
     this.setState({
@@ -338,7 +351,7 @@ class App extends Component{
     }
   }
   setNavBarLinks(){
-    let logout = document.getElementById("logout");
+    let logout = $("#logout")[0];
     logout.style.display = "inline";
     logout.onclick = () =>{
       firebase.auth().signOut().then(function() {
@@ -350,7 +363,7 @@ class App extends Component{
     }
   }
   hideLinks(){
-    let logout = document.getElementById("logout");
+    let logout = $("#logout")[0];
     logout.style.display="none"
   }
   componentDidMount(){

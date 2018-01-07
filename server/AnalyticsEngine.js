@@ -9,6 +9,12 @@ class AnalyticsEngine{
         this.firebase = new Firebase(secretsFileName);
     }
     /**
+     * Get all the users from the firebase database
+     */
+    getUsers(callback){
+        this.firebase.getUsers(callback)
+    }
+    /**
      * Add a user to our firebase database.
      */
     newSavedUser(username,userId,sessionId){

@@ -12,3 +12,4 @@ test_credentials.json
 **/dist/popup/*.js
 npm-debug.log
 test.html
+package-lock.json

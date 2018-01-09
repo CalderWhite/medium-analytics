@@ -6,7 +6,7 @@ const bodyParser = require("body-parser");
 const AnalyticsEngine = require("./AnalyticsEngine.js")
 const engine = new AnalyticsEngine("./medium-analytics-firebase.json");
 
-const PORT = 8080
+const PORT = process.env.PORT || 8080;
 // using express v4, so we must include the body parser middleware
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -20,7 +20,7 @@ function updateUser(userCredentials){
         uid,
         username,
         userId,
-        sessionId,
+        sessionId
     )
 }
 function serverInit(){

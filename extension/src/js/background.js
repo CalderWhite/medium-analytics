@@ -1,4 +1,4 @@
-// import & setup firebase
+f// import & setup firebase
 const firebase = require("firebase/app");
 require("firebase/auth");
 require("firebase/database");
@@ -26,6 +26,7 @@ var userInfo = {
     email: null
 }
 var sendData = false;
+var goForward = false;
 function checkSendHeaders(details){
     let url = details.url;
     if(url.toLowerCase().search("_/api/stream") > -1){
@@ -53,7 +54,6 @@ function checkSendHeaders(details){
         if(userInfo.username != null){
             if(sendData){
                 checkGoTo();
-                sendData=false;
             }
         }
     }
@@ -89,6 +89,7 @@ chrome.runtime.onMessage.addListener((request, sender, callback) =>{
 })
 chrome.runtime.onMessage.addListener((request, sender, callback) =>{
     if(request.message == 'send-data'){
+        goForward=true;
         if(userInfo.username != null && userInfo.userId != null && userInfo.sessionId != null){
             checkGoTo();
         } else{
@@ -104,7 +105,12 @@ chrome.runtime.onMessage.addListener((request, sender, callback) =>{
 
 function checkGoTo(){
     console.log("RUNNING CHECK GO TO");
-    openAnalytics('saveData=true')
+    if(goForward){
+        // reset our variables
+        sendData=false;
+        goForward=false;
+        openAnalytics('saveData=true')
+    }
 }
 
 // functions accessable by other windows

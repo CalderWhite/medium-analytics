@@ -52,6 +52,7 @@ function main(){
         } else{
             // if there is a query parameter saying to forward this page to the dashboard application, do that
             if(getParameterByName('forward-to-medium-analytics',window.location.href) != null){
+                alert("yes")
                 chrome.runtime.sendMessage({message:'send-data'});
                 chrome.runtime.sendMessage({message:'close-me'});
             }
@@ -61,6 +62,7 @@ function main(){
 // before any code is run, check if this is the domain selected to redirect to our app.
 // (This is since firebase seems to not have support yet for chrome extension)
 if(window.location.href.toString().search("calderwhite.github.io/medium-analytics/login") > -1){
+    alert("yuh")
     chrome.runtime.sendMessage({message:"open-analytics",closeCurrent:true},err=>{
         window.close();
     });

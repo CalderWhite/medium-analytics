@@ -4,7 +4,7 @@
   "name": "medium-analytics",
   "description": "Medium analytics done right.",
   "version": "0.1.1",
-
+  "key":"MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApahO1++dKxyoRdtLvGY8w7IFtBSp4vUXkMRyW2abfl3xJGcnM237ty8+AMxJBqL8AkD+zbZzIVwP8puV/Sql7NCGiasA6qPPbMrUVkJThTDst37YD+0ievTYnRPHGy0deL3j/HlBocMf++vJz+VJhd10c1t60ntrIVJpSMdKjvX4XNqDA3KWsVtJGiBHi+48Q8gR5Gz07+Vs+j5h9eIhQPgsgeTthf7W+6rHloxXWBZNzaBz0GNaaqlzPQ2eEZfyNQJBoe2MMZnSHJGyIR5YnYJMc9LPmDivt2SYhhB5kLBOWyKJp/dt418Mldd5GdckCJNoUCM+fdIFGbB4aE4cYQIDAQAB",
   "browser_action": {
     "default_icon": "./icon.png",
     "default_popup": "popup/popup.html"

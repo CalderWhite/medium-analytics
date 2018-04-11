@@ -4,9 +4,9 @@
 </h1>
 <h4>
     <i>Hourly checking on your Medium stats with insightful graphs, for free.</i>
-</h4>
-Get the chrome extension:     
-Support the Medium Article:     
+</h4>  
+
+Support the [Medium Article](https://medium.com/@calderwhite/medium-analytics-ec27078b67b1)
 
 # Built With
 <a href="https://reactjs.org/">
